@@ -1,6 +1,6 @@
 # DESIGN — Web Portofolio Hong Khai
 
-Versi: **v1.0 (DISETUJUI Hong Khai)** · 2026-11-15
+Versi: **v1.0 (DISETUJUI Hong Khai)** · 2026-11-15 · **v2.0 disetujui (§9 Panel Admin)** · 2026-11-18
 Status: tahap DESAIN. Belum ada kode.
 
 ---
@@ -148,3 +148,88 @@ Tombol ID / EN mengarah ke halaman yang sama di bahasa lain (misal `/proyek/hisa
 3. Hong Khai mengisi konten asli
 4. Review: kontras, HP, cetak CV, privasi screenshot
 5. Deploy ke Cloudflare Pages
+
+> Tahap 1–2 selesai (2026-11-18, commit 89bcc9d). Tahap 3–5 digantikan oleh §9.
+
+---
+
+## 9. v2.0: Panel Admin Konten (DISETUJUI 2026-11-18)
+
+Diputuskan Hong Khai pada 2026-11-18: isi portofolio diedit lewat panel admin, disimpan di **Cloudflare D1**, memakai akun Cloudflare **pribadi Hong Khai**.
+
+### 9.1 Keputusan
+
+| # | Topik | Keputusan |
+|---|---|---|
+| 5 | Hosting | **Cloudflare Worker** + static assets + **D1** (menggantikan Pages). Alamat: https://portofolio.jaohongk.workers.dev |
+| 6 | Render | **Worker merender HTML** dari D1. Tampilan, URL (`/`, `/en/`, `/proyek/…`), SEO, dan kerja tanpa JS sama seperti v1 |
+| 7 | Login admin | **Cloudflare Access**: hanya email admin Hong Khai, kode dikirim ke email. Worker **juga** memverifikasi token Access (JWT), jadi `/admin` tetap terkunci walau dibuka lewat jalur lain |
+| 8 | Gambar | **Google Drive**: di admin cukup tempel link share Drive |
+| 9 | Cakupan | **Semua isi** bisa diedit; setiap isian punya kolom **ID dan EN** berdampingan; CV tersusun otomatis dari data yang sama |
+| 10 | Deploy | `wrangler deploy` dari PC ini dengan login akun Cloudflare pribadi |
+
+### 9.2 Gambar dari Google Drive
+
+Alur: tempel link Drive di admin → disimpan **ID file** saja → halaman memakai `/img/<id>` → Worker mengambil gambar dari Drive lalu menyimpannya di cache Cloudflare.
+
+- (+) Gratis, tanpa kartu, dan upload cukup lewat Drive yang sudah biasa dipakai
+- (+) Pengunjung tidak diarahkan ke Google, dan setelah cache terisi gambar dimuat cepat
+- (−) File Drive **wajib** di-share "Siapa saja yang memiliki link". Admin menampilkan peringatan kalau gambar tidak bisa diambil
+- (−) Pengambilan langsung dari Drive bukan layanan resmi Google untuk hosting gambar, jadi sewaktu-waktu bisa berubah. Kalau terjadi, cukup ganti sumber di satu tempat (`/img/`)
+- Aturan privasi §6 tetap berlaku: tidak ada foto/data santri di file yang di-share
+
+### 9.3 Model data (D1)
+
+Semua teks disimpan dua kolom: `…_id` dan `…_en`. Isian kosong = **tidak ditampilkan** (penanda `[ISI: …]` hilang dengan sendirinya).
+
+| Tabel | Isi |
+|---|---|
+| `profil` | satu baris: nama, identitas, kota, sekolah, paragraf tentang, foto, email, GitHub, LinkedIn, bahasa yang dikuasai |
+| `keahlian` | urutan, nama |
+| `proyek` | slug (URL), urutan, judul, peran, periode, alat (tag), ringkasan, gambar, masalah, peran detail, hasil, pelajaran, gambar proses/hasil, tampil |
+| `proyek_langkah` | langkah proses per proyek: urutan, judul, isi |
+| `desain` | urutan, judul, gambar, tampil |
+| `pengalaman` | urutan, tahun, jabatan, organisasi, dampak, tampil |
+| `prestasi` | urutan, jenis (lomba/penghargaan/sertifikat), nama, pemberi, tahun, link bukti, tampil |
+| `pendidikan` | untuk CV: urutan, nama sekolah, tahun, keterangan |
+
+- Teks polos; baris kosong = paragraf baru; daftar = satu item per baris. **Tidak menerima HTML** (mencegah XSS)
+- Setiap item punya tombol **tampil/sembunyi** dan **naik/turun** untuk urutan
+- Proyek baru otomatis mendapat halaman studi kasus `/proyek/<slug>` dan `/en/proyek/<slug>`
+- Isi awal D1 = teks yang sudah ditulis di v1
+
+### 9.4 Panel admin `/admin`
+
+- Satu halaman dengan tab: Profil · Keahlian · Proyek · Desain · Pengalaman · Prestasi · Pendidikan · Cadangan
+- Form ID | EN berdampingan (bertumpuk di HP); tombol **Simpan** per item; perubahan langsung tayang
+- Tombol **Lihat halaman** untuk membuka hasilnya
+- Tab Cadangan: **Ekspor JSON** (unduh semua isi) dan **Impor JSON**. D1 juga punya Time Travel (pemulihan ke titik waktu sebelumnya)
+- Gaya visual sama dengan situs (token warna §4)
+
+### 9.5 Keamanan
+
+1. `/admin` dan `/api/admin/*` dilindungi Cloudflare Access **dan** verifikasi JWT di Worker (tim Access + AUD disimpan sebagai variabel)
+2. Semua teks di-escape saat dirender; link hanya boleh `https://` atau `mailto:`
+3. ID D1 boleh ada di `wrangler.jsonc` (bukan rahasia; butuh login akun untuk dipakai). Tidak ada secret di repo
+4. Repo tetap publik; isi asli hanya ada di D1, bukan di repo
+
+### 9.6 Struktur folder (rencana)
+
+```
+portofolio/
+├── DESIGN.md, README.md, wrangler.jsonc
+├── src/        worker.js (router), render.js (template HTML), admin-api.js, db.js, access.js
+├── migrations/ 0001_skema.sql, 0002_isi_awal.sql
+└── public/     assets/ (css, js), admin/ (index.html, admin.js)
+```
+File HTML v1 (`index.html`, `en/`, `proyek/`, `cv.html`) menjadi dasar template, lalu dihapus dari root setelah Worker siap.
+
+### 9.7 Langkah
+
+1. Hong Khai menyetujui §9
+2. Hong Khai: `npx wrangler logout`, lalu `npx wrangler login` dengan jaohongk@gmail.com (login HISADA di PC ini akan terlepas)
+3. Bangun Worker + D1 + admin, uji lokal (`wrangler dev`)
+4. Deploy, lalu Hong Khai memasang Cloudflare Access untuk `/admin` (panduan langkah demi langkah disediakan)
+5. Hong Khai mengisi konten asli lewat admin
+
+> Status 2026-11-18: langkah 1–3 selesai. Worker live di https://portofolio.jaohongk.workers.dev, D1 sudah dimigrasi dan diisi teks v1. `/admin` terkunci sampai Cloudflare Access dipasang (langkah 4). Uji: 75 cek integrasi + 14 cek JWT Access + cek skema, semuanya lulus.

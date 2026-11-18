@@ -1,0 +1,80 @@
+/* Panel admin — memakai token dari style.css */
+.admin .nav .who { font: 12px var(--mono); color: var(--muted); margin-left: auto; overflow-wrap: anywhere; }
+.admin .nav .tools { margin-left: 0; }
+@media (max-width: 760px) { .admin .nav .who { display: none; } .admin .nav .tools { margin-left: auto; } }
+
+.adm { padding-block: 24px 80px; }
+.tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 18px; }
+.tabs button {
+  font: 500 13px var(--mono); color: var(--muted); background: transparent;
+  border: 1px solid var(--border); border-radius: 6px; padding: 7px 11px; cursor: pointer;
+}
+.tabs button[aria-selected="true"] { color: var(--bg); background: var(--accent); border-color: var(--accent); }
+.status { color: var(--muted); font-size: 14px; margin: 0 0 14px; }
+.status.err { color: #f85149; }
+
+.bar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.bar h1 { font: 700 20px var(--sans); margin: 0; }
+.bar p { margin: 0; color: var(--muted); font-size: 14px; flex-basis: 100%; }
+
+.item {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+  margin-bottom: 12px; min-width: 0;
+}
+.item.dirty { border-color: var(--accent-2); }
+.item > summary {
+  list-style: none; cursor: pointer; padding: 12px 16px;
+  display: flex; gap: 10px; align-items: center; font-weight: 600;
+}
+.item > summary::-webkit-details-marker { display: none; }
+.item > summary::before { content: "▸"; color: var(--muted); font-family: var(--mono); }
+.item[open] > summary::before { content: "▾"; }
+.item > summary .t { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.badge { font: 600 11px var(--mono); padding: 2px 7px; border-radius: 4px; border: 1px solid var(--border); color: var(--muted); }
+.badge.warn { color: var(--accent-2); border-color: var(--accent-2); }
+.body { padding: 4px 16px 16px; display: grid; gap: 14px; }
+.profil .body { padding-top: 16px; }
+
+.field { display: grid; gap: 6px; min-width: 0; }
+.field > label, .field > .lbl { font: 500 12px var(--mono); color: var(--muted); }
+.pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.pair > div { display: grid; gap: 4px; min-width: 0; }
+.pair .lang { font: 600 10px var(--mono); color: var(--accent); letter-spacing: .08em; }
+@media (max-width: 700px) { .pair { grid-template-columns: 1fr; } }
+.adm input[type="text"], .adm textarea, .adm select {
+  width: 100%; font: 14px/1.5 var(--sans); color: var(--text); background: var(--bg);
+  border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px;
+}
+.adm textarea { min-height: 96px; resize: vertical; }
+.adm input:focus, .adm textarea:focus, .adm select:focus { outline: 2px solid var(--accent); outline-offset: 0; border-color: var(--accent); }
+.field.kosong-en textarea:last-of-type, .field .en-kosong { border-color: var(--accent-2); }
+.hint { font-size: 12px; color: var(--muted); margin: 0; }
+.hint.err { color: #f85149; }
+.hint.ok { color: var(--accent); }
+
+.img-row { display: flex; gap: 10px; align-items: flex-start; flex-wrap: wrap; }
+.img-row input { flex: 1 1 240px; }
+.thumb { width: 96px; height: 96px; border-radius: 6px; border: 1px solid var(--border); object-fit: cover; background: var(--bg); }
+
+.actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.actions .sp { flex: 1; }
+.btn.sm { padding: 7px 12px; font-size: 12px; }
+.btn.danger { color: #f85149; border-color: color-mix(in srgb, #f85149 50%, var(--border)); }
+.btn.danger.yakin { background: #f85149; color: #fff; border-color: #f85149; }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.check { display: inline-flex; gap: 6px; align-items: center; font-size: 14px; }
+
+.sub { border-top: 1px dashed var(--border); padding-top: 12px; }
+.sub h3 { font: 700 13px var(--mono); color: var(--accent); margin: 0 0 10px; }
+.sub .item { background: var(--bg); }
+
+.backup { display: grid; gap: 16px; }
+.backup .card { gap: 10px; }
+.backup .card p { color: var(--text); }
+
+.toast {
+  position: fixed; left: 50%; bottom: max(20px, env(safe-area-inset-bottom, 0px)); transform: translateX(-50%);
+  background: var(--text); color: var(--bg); font: 600 13px var(--mono);
+  padding: 10px 16px; border-radius: 8px; z-index: 40; max-width: calc(100% - 32px);
+}
+.toast.err { background: #f85149; color: #fff; }
