@@ -227,7 +227,7 @@ File HTML v1 (`index.html`, `en/`, `proyek/`, `cv.html`) menjadi dasar template,
 ### 9.7 Langkah
 
 1. Hong Khai menyetujui §9
-2. Hong Khai: `npx wrangler logout`, lalu `npx wrangler login` dengan jaohongk@gmail.com (login HISADA di PC ini akan terlepas)
+2. Hong Khai: `npx wrangler logout`, lalu `npx wrangler login` dengan email admin Hong Khai (login HISADA di PC ini akan terlepas)
 3. Bangun Worker + D1 + admin, uji lokal (`wrangler dev`)
 4. Deploy, lalu Hong Khai memasang Cloudflare Access untuk `/admin` (panduan langkah demi langkah disediakan)
 5. Hong Khai mengisi konten asli lewat admin
