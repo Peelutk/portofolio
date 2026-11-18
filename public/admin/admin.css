@@ -72,6 +72,20 @@
 .backup .card { gap: 10px; }
 .backup .card p { color: var(--text); }
 
+.keluar { margin: 0; display: contents; }
+
+/* Halaman masuk */
+.masuk { min-height: 100vh; display: grid; place-items: center; padding-block: 40px; }
+.masuk .card { width: 100%; max-width: 380px; gap: 14px; }
+.masuk .brand { margin: 0; }
+.masuk h1 { font: 700 24px var(--sans); margin: 0; }
+.masuk input[type="password"] {
+  width: 100%; font: 15px var(--sans); color: var(--text); background: var(--bg);
+  border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px;
+}
+.masuk input:focus { outline: 2px solid var(--accent); border-color: var(--accent); }
+.masuk .back { justify-self: start; }
+
 .toast {
   position: fixed; left: 50%; bottom: max(20px, env(safe-area-inset-bottom, 0px)); transform: translateX(-50%);
   background: var(--text); color: var(--bg); font: 600 13px var(--mono);

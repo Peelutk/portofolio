@@ -1,7 +1,7 @@
 // Worker portofolio: render halaman dari D1, proxy gambar Drive, API & panel admin.
 import { muatSemua, proyekBySlug, gambarDipakai, simpanProfil, tambah, ubah, hapus, urutkan, ekspor, impor, ambilIdDrive, GalatValidasi } from './db.js';
 import { halamanBeranda, halamanProyek, halamanCv, halaman404 } from './render.js';
-import { cekAdmin } from './access.js';
+import { cekAdmin, halamanMasuk, prosesMasuk, cookieKeluar } from './sesi.js';
 import { layaniGambar, ambilDariDrive } from './gambar.js';
 import { SKEMA, kolomGambar } from './skema.js';
 
@@ -53,11 +53,28 @@ async function tangani(request, env, ctx) {
 
   // ---- admin ----
   if (path === '/admin' || path.startsWith('/admin/') || path.startsWith('/api/admin/')) {
+    const noStore = { 'Cache-Control': 'no-store' };
+    // halaman & proses masuk / keluar (tidak butuh sesi)
+    if (path === '/admin/masuk') {
+      if (request.method === 'POST') {
+        const r = await prosesMasuk(request, env);
+        if (r.redirect) return new Response(null, { status: r.status, headers: { Location: r.redirect, 'Set-Cookie': r.cookie, ...noStore } });
+        return html(r.html, r.status, noStore);
+      }
+      if (await cekAdmin(request, env)) return pindah('/admin/', 302);
+      return html(halamanMasuk(), 200, noStore);
+    }
+    if (path === '/admin/keluar' && request.method === 'POST') {
+      return new Response(null, { status: 303, headers: { Location: '/admin/masuk', 'Set-Cookie': cookieKeluar(request), ...noStore } });
+    }
+    // aset tampilan halaman masuk boleh tanpa sesi
+    if (path === '/admin/admin.css') return env.ASSETS.fetch(request);
+
     const admin = await cekAdmin(request, env);
     if (!admin) {
       return path.startsWith('/api/')
-        ? json({ galat: 'Tidak diizinkan. Masuk lewat Cloudflare Access.' }, 403)
-        : html('<!doctype html><meta charset="utf-8"><title>403</title><p style="font-family:sans-serif;padding:24px">Tidak diizinkan. Panel admin hanya bisa dibuka lewat Cloudflare Access.</p>', 403);
+        ? json({ galat: 'Sesi berakhir. Silakan masuk lagi.' }, 401)
+        : pindah('/admin/masuk', 302);
     }
     if (path.startsWith('/api/admin/')) return apiAdmin(request, env, path.slice('/api/admin/'.length), admin);
     if (path === '/admin') return pindah('/admin/', 302);

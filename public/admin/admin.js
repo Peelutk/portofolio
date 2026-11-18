@@ -41,6 +41,11 @@
     var opt = { method: method, headers: { 'X-Admin': '1' }, credentials: 'same-origin' };
     if (body !== undefined) { opt.headers['Content-Type'] = 'application/json'; opt.body = JSON.stringify(body); }
     return fetch('/api/admin/' + path, opt).then(function (r) {
+      if (r.status === 401) {
+        if (adaDirty()) throw new Error('Sesi berakhir. Salin perubahan Anda, lalu masuk lagi lewat tombol Keluar.');
+        location.href = '/admin/masuk';
+        throw new Error('Sesi berakhir. Mengalihkan ke halaman masuk…');
+      }
       return r.json().catch(function () { return {}; }).then(function (j) {
         if (!r.ok) throw new Error(j.galat || ('Gagal (' + r.status + ')'));
         return j;
